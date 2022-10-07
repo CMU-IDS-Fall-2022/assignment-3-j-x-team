@@ -4,8 +4,9 @@ import altair as alt
 from vega_datasets import data
 
 st.title("Social Capital Data Interaction.")
-
+# date: 1007
 @st.cache  # add caching so we load the data only once
+
 def load_data():
     return pd.read_csv("data/social_capital_zip_coords.csv")
 
@@ -20,6 +21,7 @@ st.write(len(df.index))
 # allows zoom in/out, but seems not supporting tooltip on data points
 geo_data = df[['lat','lng']] # change column name, st.map() only recognize column names of "lat" and "lon"
 geo_data = geo_data.rename(columns={'lng':'lon'})
+st.map(geo_data)
 
 # altair way to create map chart
 # altair supports tooltip on datapoints, but currently doesn't support to zoom in/out a map chart
@@ -30,8 +32,8 @@ background = alt.Chart(states).mark_geoshape(
     fill='lightgray',
     stroke='white'
 ).project('albersUsa').properties(
-    width=500,
-    height=300
+    width=1000,
+    height=800
 )
 
 points = alt.Chart(df).mark_circle().encode(
