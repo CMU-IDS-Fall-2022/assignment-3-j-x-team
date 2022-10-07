@@ -22,8 +22,6 @@ st.write(len(df.index))
 geo_data = df[['lat','lng']] # change column name, st.map() only recognize column names of "lat" and "lon"
 geo_data = geo_data.rename(columns={'lng':'lon'})
 
-st.map(geo_data).tooltip().interactive()
-
 # altair way to create map chart
 # altair supports tooltip on datapoints, but currently doesn't support to zoom in/out a map chart
 # reference: https://altair-viz.github.io/altair-tutorial/notebooks/09-Geographic-plots.html
