@@ -144,6 +144,8 @@ for i in individual_df['proportion of people who are members of a civic organiza
 
 individual_df['civic_organizations_zip_percentile'] = civic_organizations_list
 
+
+st.title("Social Capital Metrics of Selected Zip Code")
 #   **To Do**
 #   Change the iloc to a variable set equal to the index of the zip code selected in the map.
 
