@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from re import U
+import urllib.request
+import ssl
+from scipy import stats
 
 st.title("Cleaning & Praparing Data")
 ## Include zip code > lat/lng data code here.
@@ -24,6 +27,15 @@ st.title("Cleaning & Praparing Data")
 # sc_df = pd.merge(sc_df, zip_and_coords, on='zip')
 
 #sc_df.to_csv("social_capital_zip_coords.csv")
+
+## Add State, County, and City to the df from another csv file.
+
+ssl._create_default_https_context = ssl._create_unverified_context
+url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
+city_state_county_df = pd.read_csv(url)
+
+
+
 
 st.title("Social Capital Data Interaction.")
 # date: 1007
@@ -98,4 +110,48 @@ individual_df = individual_df.rename(columns={'num_below_p50':'numer of children
 
 individual_df = individual_df.set_index('zip')
 
-st.table(individual_df)
+#   **To Do**
+#   Change the iloc to a variable set equal to the index of the zip code selected in the map.
+st.table(individual_df.iloc[0:10])
+
+## Add a column for the percentile of the following:
+#   ec_zip (economic connectedness), clustering_zip (cohesiveness), and 
+#   civic_organizations_zip.
+
+# Drop all rows with NaN values to make processing easier.
+individual_df = individual_df.dropna()
+
+ec_zip_percentile_list = []
+
+for i in individual_df['economic connectedness score']:
+    percentile = stats.percentileofscore(individual_df['economic connectedness score'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    ec_zip_percentile_list.append(percentile_val)
+
+individual_df['ec_zip_percentile'] = ec_zip_percentile_list
+
+clustering_zip_list = []
+
+for i in individual_df['proportion of a person\'s friends who are friends with each other']:
+    percentile = stats.percentileofscore(individual_df['proportion of a person\'s friends who are friends with each other'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    clustering_zip_list.append(percentile_val)
+
+individual_df['clustering_zip_percentile'] = clustering_zip_list
+
+civic_organizations_list = []
+
+for i in individual_df['proportion of people who are members of a civic organization']:
+    percentile = stats.percentileofscore(individual_df['proportion of people who are members of a civic organization'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    civic_organizations_list.append(percentile_val)
+
+individual_df['civic_organizations_zip_percentile'] = civic_organizations_list
+
+
+st.table(individual_df.iloc[0:10])
+
+## Make a bar graph that displays the selected zip code's percentile
+#   for each of the 3 social capital indicators.
+#   On hover, show the raw score for that indicator.
+
