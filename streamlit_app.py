@@ -5,6 +5,8 @@ from re import U
 import urllib.request
 import ssl
 from scipy import stats
+from vega_datasets import data
+
 
 st.title("Cleaning & Praparing Data")
 ## Include zip code > lat/lng data code here.
@@ -51,50 +53,54 @@ st.write("Let's look at raw data in the Pandas Data Frame.")
 st.write(df)
 st.write(len(df.index))
 
-# streamlit way to create map chart
-# allows zoom in/out, but seems not supporting tooltip on data points
-geo_data = df[['lat','lng']] # change column name, st.map() only recognize column names of "lat" and "lon"
-geo_data = geo_data.rename(columns={'lng':'lon'})
-st.map(geo_data)
+# change the webpage's css style to display radio buttons horizontally
+# reference: https://discuss.streamlit.io/t/horizontal-radio-buttons/2114/3
+st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
 
-# altair way to create map chart
+# create radio buttons for users to select one dimension
+dimension = st.radio("Select one dimension of social capital",("Economic Connectedness", "Cohesiveness", "Civic Engagement"))
+
+
+# use altair to create map chart
 # altair supports tooltip on datapoints, but currently doesn't support to zoom in/out a map chart
 # reference: https://altair-viz.github.io/altair-tutorial/notebooks/09-Geographic-plots.html
+states = alt.topo_feature(data.us_10m.url, feature='states')
 
-sc_chart = alt.Chart(df).mark_circle().encode(
-    longitude='lng:Q',
-    latitude='lat:Q',
-    size=alt.value(10),
-    tooltip='zip'
-).project(
-    type='albersUsa'
+background = alt.Chart(states).mark_geoshape(
+    fill='lightgray',
+    stroke='white'
+).project('albersUsa').properties(
+    width=800,
+    height=600
+)
+
+map_title = dimension + " by Zipcode"
+dimension_dic = {
+    "Economic Connectedness": "ec_zip",
+    "Cohesiveness": "clustering_zip", 
+    "Civic Engagement":"volunteering_rate_zip"
+    }
+map_tooltip_value = dimension_dic[dimension]
+
+st.write(str(dimension)+" is measured by "+str(dimension_dic[dimension])+", the percentage of ..")
+
+points = alt.Chart(df).mark_circle().encode(
+    longitude = 'lng',
+    latitude = 'lat',
+    size = alt.value(10),
+    tooltip = ['zip', map_tooltip_value],
+    color=alt.Color(map_tooltip_value, 
+                    scale=alt.Scale(
+                        domain=[df[map_tooltip_value].min(), df[map_tooltip_value].max()], 
+                        range=['red', 'orange','yellow','green','blue'])),
 ).properties(
-    width=600,
-    height=400,
-    title='Social Capital by Zipcode'
+    width = 800,
+    height = 600,
+    title = map_title
 ).interactive()
 
-st.altair_chart(sc_chart, use_container_width=True)
+st.write(background+points)
 
-
-# states = alt.topo_feature(data.us_10m.url, feature='states')
-
-# background = alt.Chart(states).mark_geoshape(
-#     fill='lightgray',
-#     stroke='white'
-# ).project('albersUsa').properties(
-#     width=1000,
-#     height=800
-# )
-
-# points = alt.Chart(df).mark_circle().encode(
-#     longitude = 'lng',
-#     latitude = 'lat',
-#     size = alt.value(10),
-#     tooltip = ['zip','lat','lng','ec_zip']
-# ).interactive()
-
-# st.write(background+points)
 
 
 ## Make a table that displays (for the selected zip code):
