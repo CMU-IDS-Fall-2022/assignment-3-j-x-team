@@ -155,3 +155,21 @@ st.table(individual_df.iloc[0:10])
 #   for each of the 3 social capital indicators.
 #   On hover, show the raw score for that indicator.
 
+source = pd.DataFrame({
+    'metric_names': ['Economic Connectedness', 'Cohesiveness', 'Civic Engagement'],
+    'percentiles': [individual_df['ec_zip_percentile'].iloc[0], individual_df['clustering_zip_percentile'].iloc[0], individual_df['civic_organizations_zip_percentile'].iloc[0]],
+    'raw_scores': [individual_df['economic connectedness score'].iloc[0], individual_df['proportion of a person\'s friends who are friends with each other'].iloc[0], individual_df['proportion of people who are members of a civic organization'].iloc[0]]
+})
+
+source_chart = alt.Chart(source).mark_bar().encode(
+    x='percentiles:Q',
+    y='metric_names:N',
+    tooltip=['raw_scores']
+).properties(
+    width=600,
+    height=400,
+    title='Social Capital Percentiles for Selected Zipcode'
+).interactive()
+
+st.altair_chart(source_chart, use_container_width=True)
+
