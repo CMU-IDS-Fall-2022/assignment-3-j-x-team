@@ -110,10 +110,6 @@ individual_df = individual_df.rename(columns={'num_below_p50':'numer of children
 
 individual_df = individual_df.set_index('zip')
 
-#   **To Do**
-#   Change the iloc to a variable set equal to the index of the zip code selected in the map.
-st.table(individual_df.iloc[0:10])
-
 ## Add a column for the percentile of the following:
 #   ec_zip (economic connectedness), clustering_zip (cohesiveness), and 
 #   civic_organizations_zip.
@@ -148,6 +144,8 @@ for i in individual_df['proportion of people who are members of a civic organiza
 
 individual_df['civic_organizations_zip_percentile'] = civic_organizations_list
 
+#   **To Do**
+#   Change the iloc to a variable set equal to the index of the zip code selected in the map.
 
 st.table(individual_df.iloc[0:10])
 
