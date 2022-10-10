@@ -1,4 +1,3 @@
-from dataclasses import fields
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -8,6 +7,8 @@ import ssl
 from scipy import stats
 from vega_datasets import data
 import numpy as np
+from dataclasses import fields
+
 
 
 st.title("Cleaning & Praparing Data")
