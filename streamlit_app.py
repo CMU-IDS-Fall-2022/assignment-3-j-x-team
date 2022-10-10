@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from re import U
 import urllib.request
 import ssl
 from scipy import stats

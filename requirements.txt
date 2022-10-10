@@ -2,7 +2,6 @@ scipy
 streamlit
 pandas
 altair
-re
 urllib.request
 ssl
 vega_datasets
