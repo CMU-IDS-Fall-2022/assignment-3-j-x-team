@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import urllib.request
-import ssl
+# import ssl
 from scipy import stats
 from vega_datasets import data
 import numpy as np
@@ -27,7 +27,7 @@ st.title("Cleaning & Praparing Data")
 
 ## Add State, County, and City to the df from another csv file.
 
-ssl._create_default_https_context = ssl._create_unverified_context
+# ssl._create_default_https_context = ssl._create_unverified_context
 url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
 city_state_county_df = pd.read_csv(url)
 

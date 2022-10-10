@@ -2,7 +2,6 @@ scipy
 streamlit
 pandas
 altair
-ssl
 vega_datasets
 streamlit_vega_lite
 numpy
