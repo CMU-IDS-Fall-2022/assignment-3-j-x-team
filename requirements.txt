@@ -1,10 +1,10 @@
+scipy
 streamlit
 pandas
 altair
 re
 urllib.request
 ssl
-scipy
 vega_datasets
 streamlit_vega_lite
 numpy
