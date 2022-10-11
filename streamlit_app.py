@@ -2,16 +2,20 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import urllib.request
-# import ssl
+import ssl
 from scipy import stats
 from vega_datasets import data
 import numpy as np
 from dataclasses import fields
+from operator import index
 
 
 
 st.title("Cleaning & Praparing Data")
-## Include zip code > lat/lng data code here.
+
+## **Data Cleaning**
+## Step 1: The LAT and LNG data was added to the dataframe to enable each zip code to be plotted on a map.
+
 # sc_df = pd.read_csv("social_capital_zip.csv")
 # sc_df.reset_index(inplace=True)
 # sc_df.zip = sc_df.zip.astype(str)
@@ -23,13 +27,76 @@ st.title("Cleaning & Praparing Data")
 
 # Merge the two dataframes
 # sc_df = pd.merge(sc_df, zip_and_coords, on='zip')
-#sc_df.to_csv("social_capital_zip_coords.csv")
+# sc_df.to_csv("social_capital_zip_coords.csv")
 
-## Add State, County, and City to the df from another csv file.
+# Load the resulting dataframe.
+def load_data():
+    return pd.read_csv("data/social_capital_zip_coords.csv")
 
-# ssl._create_default_https_context = ssl._create_unverified_context
+df = load_data()
+
+# Drop unnecessary columns 'County', 'Unnamed: 0', and 'index'.
+
+df = df.drop('county', axis=1)
+df = df.drop('Unnamed: 0', axis=1)
+df = df.drop('index', axis=1)
+
+# Make the zip code column a string to enable a later merge on the zip code column.
+df['zip'] = df['zip'].astype(str)
+
+df = df.set_index('zip')
+
+df = df.dropna()
+
+## Step 2: Import a dataframe that contains the state, city, and county of each zip code.
+
+ssl._create_default_https_context = ssl._create_unverified_context
 url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
-city_state_county_df = pd.read_csv(url)
+city_state_df = pd.read_csv(url)
+
+city_state_df.rename(columns={'zipcode': 'zip'}, inplace=True)
+
+# Set the index to the zip code column for a later merge with the social capital dataframe.
+city_state_df.set_index('zip', inplace=True)
+
+# Step 3: Merge the two dataframes.  City, country, State, state_abbr, and state_fips are added as columns in the df.
+
+df = pd.merge(df, city_state_df, on='zip')
+
+# Step 4: Add a column for each percentile of each social capital dimension.
+
+ec_zip_percentile_list = []
+
+for i in df['ec_zip']:
+    percentile = stats.percentileofscore(df['ec_zip'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    ec_zip_percentile_list.append(percentile_val)
+
+df['ec_zip_percentile'] = ec_zip_percentile_list
+
+clustering_zip_list = []
+
+for i in df['clustering_zip']:
+    percentile = stats.percentileofscore(df['clustering_zip'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    clustering_zip_list.append(percentile_val)
+
+df['clustering_zip_percentile'] = clustering_zip_list
+
+civic_organizations_list = []
+
+for i in df['civic_organizations_zip']:
+    percentile = stats.percentileofscore(df['civic_organizations_zip'], i, kind='strict')
+    percentile_val = round(percentile, 2)
+    civic_organizations_list.append(percentile_val)
+
+df['civic_organizations_zip_percentile'] = civic_organizations_list
+
+
+
+
+
+
 
 alt.data_transformers.disable_max_rows() #Disabling MaxRowsError to load large dataset
 
@@ -37,14 +104,10 @@ st.title("Social Capital Data Interaction")
 @st.cache  # add caching so we load the data only once
 
 
-def load_data():
-    return pd.read_csv("data/social_capital_zip_coords.csv")
-
-df = load_data()
 
 st.write("Let's look at raw data in the Pandas Data Frame.")
 # TO DO: display all rows in charts
-df = df.head(200) # get the first 1000 rows to data to display charts successfully (if too large the chat fails to display)
+# df = df.head(200) # get the first 1000 rows to data to display charts successfully (if too large the chat fails to display)
 st.write(df)
 st.write("Total number of zipcodes: "+str(len(df.index)))
 
@@ -137,40 +200,6 @@ st.write(map_with_text)
 individual_df = df[['zip','num_below_p50','ec_zip','clustering_zip','civic_organizations_zip']]
 individual_df = individual_df.rename(columns={'num_below_p50':'numer of children under 50% income percentile','ec_zip':'economic connectedness score','clustering_zip':'proportion of a person\'s friends who are friends with each other','civic_organizations_zip':'proportion of people who are members of a civic organization'})
 individual_df = individual_df.set_index('zip')
-
-## Add a column for the percentile of the following:
-#   ec_zip (economic connectedness), clustering_zip (cohesiveness), and 
-#   civic_organizations_zip.
-
-# Drop all rows with NaN values to make processing easier.
-individual_df = individual_df.dropna()
-
-ec_zip_percentile_list = []
-
-for i in individual_df['economic connectedness score']:
-    percentile = stats.percentileofscore(individual_df['economic connectedness score'], i, kind='strict')
-    percentile_val = round(percentile, 2)
-    ec_zip_percentile_list.append(percentile_val)
-
-individual_df['ec_zip_percentile'] = ec_zip_percentile_list
-
-clustering_zip_list = []
-
-for i in individual_df['proportion of a person\'s friends who are friends with each other']:
-    percentile = stats.percentileofscore(individual_df['proportion of a person\'s friends who are friends with each other'], i, kind='strict')
-    percentile_val = round(percentile, 2)
-    clustering_zip_list.append(percentile_val)
-
-individual_df['clustering_zip_percentile'] = clustering_zip_list
-
-civic_organizations_list = []
-
-for i in individual_df['proportion of people who are members of a civic organization']:
-    percentile = stats.percentileofscore(individual_df['proportion of people who are members of a civic organization'], i, kind='strict')
-    percentile_val = round(percentile, 2)
-    civic_organizations_list.append(percentile_val)
-
-individual_df['civic_organizations_zip_percentile'] = civic_organizations_list
 
 
 st.title("Social Capital Metrics of Selected Zip Code")
