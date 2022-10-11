@@ -92,8 +92,24 @@ for i in df['civic_organizations_zip']:
 
 df['civic_organizations_zip_percentile'] = civic_organizations_list
 
+# Step 5: 
+
+# Make 3 new columns that describe the meaning of each social capital metric. 
+# The value of each column is the same for each row.
+# The meaning of each metric will be displayed to the user on hover.
+
+df['ec_zip_meaning'] = 'Baseline definition of economic connectedness: two times the share of high-SES friends among low-SES individuals, averaged over all low-SES individuals in the ZIP code.'
+
+df['clustering_zip_meaning'] = 'The average fraction of an individual\s friend pairs who are also friends with each other.'
+
+df['civic_organizations_zip_meaning'] = 'The number of Facebook Pages predicted to be “Public Good” pages based on page title, category, and other page characteristics, per 1,000 users in the ZIP code.'
 
 
+# Step 6: Remove remaining unnecessary columns from the dataframe.
+
+df = df.drop(columns=['exposure_grp_mem_zip','exposure_grp_mem_high_zip', 'nbhd_exposure_zip',
+       'bias_grp_mem_zip', 'bias_grp_mem_high_zip', 'nbhd_bias_zip', 'nbhd_bias_high_zip',
+       'support_ratio_zip', 'state_fips'])
 
 
 
