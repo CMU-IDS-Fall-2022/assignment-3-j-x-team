@@ -1,8 +1,10 @@
-scipy
 streamlit
 pandas
 altair
+urllib.request
+ssl
+scipy
 vega_datasets
-streamlit_vega_lite
 numpy
 dataclasses
+operator
