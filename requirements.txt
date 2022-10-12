@@ -6,4 +6,3 @@ scipy
 vega_datasets
 numpy
 dataclasses
-operator

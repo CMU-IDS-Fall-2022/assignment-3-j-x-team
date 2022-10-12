@@ -7,7 +7,7 @@ from scipy import stats
 from vega_datasets import data
 import numpy as np
 from dataclasses import fields
-from operator import index
+#from operator import index
 
 ## **Data Cleaning**
 ## Step 1: The LAT and LNG data was added to the dataframe to enable each zip code to be plotted on a map.
