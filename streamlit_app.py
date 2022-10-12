@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import urllib.request
-import ssl
+#import urllib.request
+#import ssl
 from scipy import stats
 from vega_datasets import data
 import numpy as np
@@ -42,9 +42,9 @@ df['zip'] = df['zip'].astype(str)
 df = df.dropna()
 
 ## Step 2: Import a dataframe that contains the state, city, and county of each zip code.
-ssl._create_default_https_context = ssl._create_unverified_context
-url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
-city_state_df = pd.read_csv(url)
+#ssl._create_default_https_context = ssl._create_unverified_context
+#url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
+city_state_df = pd.read_csv('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
 
 city_state_df.rename(columns={'zipcode': 'zip'}, inplace=True)
 

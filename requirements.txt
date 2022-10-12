@@ -2,8 +2,6 @@ streamlit
 pandas
 altair
 psutil
-urllib.request
-ssl
 scipy
 vega_datasets
 numpy
