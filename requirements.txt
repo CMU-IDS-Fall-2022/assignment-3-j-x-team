@@ -1,6 +1,7 @@
 streamlit
 pandas
 altair
+psutil
 urllib.request
 ssl
 scipy
