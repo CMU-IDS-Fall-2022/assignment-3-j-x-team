@@ -2,13 +2,10 @@ from json import tool
 import streamlit as st
 import pandas as pd
 import altair as alt
-#import urllib.request
-#import ssl
 from scipy import stats
 from vega_datasets import data
 import numpy as np
 from dataclasses import fields
-#from operator import index
 
 ## **Data Cleaning**
 ## Step 1: The LAT and LNG data was added to the dataframe to enable each zip code to be plotted on a map.
@@ -43,17 +40,12 @@ df['zip'] = df['zip'].astype(str)
 df = df.dropna()
 
 ## Step 2: Import a dataframe that contains the state, city, and county of each zip code.
-#ssl._create_default_https_context = ssl._create_unverified_context
-#url = urllib.request.urlopen('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
 city_state_df = pd.read_csv('https://raw.githubusercontent.com/scpike/us-state-county-zip/master/geo-data.csv')
-
 city_state_df.rename(columns={'zipcode': 'zip'}, inplace=True)
-
 
 ## Step 3: Merge the two dataframes.  City, country, State, state_abbr, and state_fips are added as columns in the df.
 df = pd.merge(df, city_state_df, on='zip')
 df['Location'] = df['state_abbr']+", "+df['county']+", "+df['city']
-
 
 ## Step 4: Add a column for each percentile of each social capital dimension.
 ec_zip_percentile_list = []
@@ -96,7 +88,7 @@ df['clustering_zip_meaning'] = 'The average fraction of an individual\s friend p
 df['volunteering_zip_meaning'] = 'The percentage of Facebook users who are members of a \'volunteering\' or \'activism\' group'
 
 
-# Step 6: Remove remaining unnecessary columns from the dataframe.
+## Step 6: Remove remaining unnecessary columns from the dataframe.
 df = df.drop(columns=['ec_se_zip','nbhd_ec_zip','ec_grp_mem_zip','ec_high_zip','ec_high_se_zip','nbhd_ec_high_zip','ec_grp_mem_high_zip','exposure_grp_mem_zip','exposure_grp_mem_high_zip', 'nbhd_exposure_zip',
        'bias_grp_mem_zip', 'bias_grp_mem_high_zip', 'nbhd_bias_zip', 'nbhd_bias_high_zip',
        'support_ratio_zip', 'state_fips'])
@@ -160,8 +152,7 @@ description = dimension_dic[dimension]
 st.markdown(str(dimension)+" is measured by "+str(descp_dict[dimension])+".")
 
 # the data points on the map background
-# TO DO: update column label names
-single_brush = alt.selection_single(on='click',fields=['zip'])
+single_brush = alt.selection_single(on='click',fields=['zip'],init={'zip': '15213'})
 multi_brush = alt.selection_multi(fields=['zip'])
 points = alt.Chart(df).mark_circle().encode(
     longitude = 'lng',
@@ -178,19 +169,12 @@ points = alt.Chart(df).mark_circle().encode(
     title = map_title
 ).add_selection(single_brush)
 
-## Part 2: Table that displaying specific info for the selected zip code:
-#   -location
-#   -num_below_p50 (% of population under 50% income percentile)
-#   -ec_zip (economic connectedness score)
-#   -clustering_zip (proportion of a person's friends who are friends with each other)
-#   -civic_organizations_zip (proportion of people who are members of a civic organization)
+## Part 2: Table that displaying specific info for the selected zip code
 st.subheader("Click to Examine a Zipcode")
 
 # text to show detailed information of one zipcode
 # reference: https://altair-viz.github.io/gallery/scatter_linked_table.html
-zip_text = alt.Chart(df).mark_text(
-    #align='right',
-).encode(
+zip_text = alt.Chart(df).mark_text().encode(
     x=alt.X(axis=None),
     y=alt.Y('row_number:O',axis=None)
 ).transform_window(
@@ -204,13 +188,6 @@ zip_text = alt.Chart(df).mark_text(
 )
 zipcode = zip_text.encode(text='zip', tooltip='zip_meaning').properties(title="Zipcode")
 location = zip_text.encode(text='Location', tooltip='location_meaning').properties(title='Location (State, County, City)')
-# num_below = zip_text.encode(text='Number Below Median', tooltip='num_below_p50_meaning').properties(title='Number Below Median')
-# population = zip_text.encode(text='Population in 2018', tooltip='population_2018_meaning').properties(title='Population in 2018')
-
-# economic_connectedness = zip_text.encode(text='Economic Connectedness', tooltip='ec_zip_meaning').properties(title='Economic Connectedness')
-# cohesiveness = zip_text.encode(text='Clustering',tooltip='clustering_zip_meaning').properties(title='Cohesiveness')
-# civic_engagement = zip_text.encode(text='Volunteering Rate', tooltip='volunteering_zip_meaning').properties(title='Civic Engagement')
-
 
 basic_info = alt.hconcat(
     zipcode,
@@ -222,33 +199,12 @@ basic_info = alt.hconcat(
 basic_info.center = True
 basic_info.title = "Detailed Information of the Selected Zipcode"
 
-
-# basic_info = alt.HConcatChart(
-#     hconcat = [zipcode, location, num_below, population],
-#     autosize = 'fit'
-# )
-
-
-# social_capital_metric = alt.hconcat(
-#     economic_connectedness,
-#     cohesiveness,
-#     civic_engagement
-# )
-
 text_area = alt.vconcat(
     basic_info,
     # social_capital_metric,
     center = True
 )
 
-# box_chart = alt.Chart(df).mark_boxplot(size = 10).encode(
-#     x = alt.X('Population in 2018:Q',
-#         title = "Population in 2018:Q",
-#         #scale=alt.Scale(rangeMin=0, rangeMax=1000),
-#         scale = alt.Scale(domain=(0,10000))
-#         ), 
-#     tooltip = 'Population in 2018',
-# ).transform_filter(single_brush).interactive()
 num_below_p50_max = df["Number Below Median"].max()
 bar_num_below_p50 = alt.Chart(df).mark_bar().encode(
     x = alt.X('Number Below Median:Q',
@@ -276,15 +232,6 @@ bar_population = alt.Chart(df).mark_bar().encode(
     height=100
 ).transform_filter(single_brush)
 
-# map_with_text = alt.vconcat(
-#     background+points,
-#     text_area,
-#     bar_num_below_p50,
-#     bar_population
-# )
-
-#st.write(map_with_text)
-
 metrics = ['Economic Connectedness Percentile', 'Clustering Percentile','Volunteering Rate Percentile']
 
 bar = alt.Chart(df).transform_fold(
@@ -295,10 +242,8 @@ bar = alt.Chart(df).transform_fold(
         axis=alt.Axis(labelAngle=0),
         sort = metrics),
     y = alt.Y('value:Q',
-        scale=alt.Scale(domain=(0,population_max)),
-        #scale = alt.Scale(domain=(0,1)),
+        scale=alt.Scale(domain=(0,100)),
         title = "Percentile",
-        #scale=alt.Scale(rangeMin=0, rangeMax=100),
         ), 
     color = alt.Color('key:N',sort = metrics, legend=None),
     tooltip ='value:Q',
