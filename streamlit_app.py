@@ -111,7 +111,7 @@ df = df.rename(columns={
 ## **Build Interaction**
 alt.data_transformers.disable_max_rows() #Disabling MaxRowsError to load large dataset
 
-st.title("What are the features of the geographic distribution of social capital metrics?")
+st.title("How do social capital metrics vary across the U.S.?")
 st.write("Data source: [Social Capital II: Determinants of Economic Connectedness](https://opportunityinsights.org/paper/social-capital-ii-determinants-of-economic-connectedness/)")
 
 show_raw_data = st.checkbox("Click to show raw data")
@@ -126,7 +126,8 @@ st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', uns
 
 ## Part 1: Map Chart to show each zipcode as one point
 # create radio buttons for users to select one dimension
-dimension = st.radio("Select one dimension of social capital",("Economic Connectedness", "Cohesiveness", "Civic Engagement"))
+st.header("Select one dimension of social capital to explore!")
+dimension = st.radio("Dimensions of social capital",("Economic Connectedness", "Cohesiveness", "Civic Engagement"))
 
 # use altair to create map chart
 # altair supports tooltip on datapoints, but currently doesn't support to zoom in/out a map chart
@@ -155,7 +156,7 @@ descp_dict = { "Economic Connectedness": "two times the share of high-SES friend
 }
 description = dimension_dic[dimension]
 
-st.write(str(dimension)+" is measured by "+str(dimension_dic[dimension])+", "+str(descp_dict[dimension]))
+st.markdown(str(dimension)+" is measured by "+str(dimension_dic[dimension])+", "+str(descp_dict[dimension])+".")
 
 # the data points on the map background
 # TO DO: update column label names
@@ -183,7 +184,7 @@ points = alt.Chart(df).mark_circle().encode(
 #   -ec_zip (economic connectedness score)
 #   -clustering_zip (proportion of a person's friends who are friends with each other)
 #   -civic_organizations_zip (proportion of people who are members of a civic organization)
-st.title("Social Capital Metrics of Selected Zip Code")
+st.subheader("Social Capital Metrics of Selected Zip Code")
 
 # text to show detailed information of one zipcode
 # reference: https://altair-viz.github.io/gallery/scatter_linked_table.html
@@ -218,6 +219,10 @@ basic_info = alt.hconcat(
     population,
 )
 
+basic_info.center = True
+basic_info.title = "Detailed Information of the Selected Zipcode"
+
+
 # basic_info = alt.HConcatChart(
 #     hconcat = [zipcode, location, num_below, population],
 #     autosize = 'fit'
@@ -236,6 +241,23 @@ text_area = alt.vconcat(
     center = True
 )
 
+box_chart = alt.Chart(df).mark_boxplot().encode(
+    x = alt.X('Population in 2018:Q',
+        title = "Population in 2018:Q",
+        #scale=alt.Scale(rangeMin=0, rangeMax=1000),
+        scale = alt.Scale(domain=(0,10000))
+        ), 
+    tooltip = 'Population in 2018',
+).transform_filter(single_brush).interactive()
+
+map_with_text = alt.vconcat(
+    background+points,
+    text_area,
+    box_chart
+)
+
+st.write(map_with_text)
+
 metrics = ['Economic Connectedness Percentile', 'Clustering Percentile','Volunteering Rate Percentile']
 
 bar = alt.Chart(df).transform_fold(
@@ -247,7 +269,8 @@ bar = alt.Chart(df).transform_fold(
         sort = metrics),
     y = alt.Y('value:Q',
         title = "Percentile",
-        #scale=alt.Scale(domain=[0, 1]),
+        #scale=alt.Scale(rangeMin=0, rangeMax=100),
+        #scale = alt.Scale(domain=(0,1))
         ), 
     color = alt.Color('key:N',sort = metrics),
     tooltip ='value:Q',
@@ -259,7 +282,7 @@ bar = alt.Chart(df).transform_fold(
 
 map_with_text = alt.vconcat(
     background+points,
-    text_area,
+    # text_area,
     bar
 )
-st.write(map_with_text)
+# st.write(map_with_text)
