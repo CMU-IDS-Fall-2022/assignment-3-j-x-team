@@ -204,19 +204,19 @@ zip_text = alt.Chart(df).mark_text(
 )
 zipcode = zip_text.encode(text='zip', tooltip='zip_meaning').properties(title="Zipcode")
 location = zip_text.encode(text='Location', tooltip='location_meaning').properties(title='Location (State, County, City)')
-num_below = zip_text.encode(text='Number Below Median', tooltip='num_below_p50_meaning').properties(title='Number Below Median')
-population = zip_text.encode(text='Population in 2018', tooltip='population_2018_meaning').properties(title='Population in 2018')
+# num_below = zip_text.encode(text='Number Below Median', tooltip='num_below_p50_meaning').properties(title='Number Below Median')
+# population = zip_text.encode(text='Population in 2018', tooltip='population_2018_meaning').properties(title='Population in 2018')
 
-economic_connectedness = zip_text.encode(text='Economic Connectedness', tooltip='ec_zip_meaning').properties(title='Economic Connectedness')
-cohesiveness = zip_text.encode(text='Clustering',tooltip='clustering_zip_meaning').properties(title='Cohesiveness')
-civic_engagement = zip_text.encode(text='Volunteering Rate', tooltip='volunteering_zip_meaning').properties(title='Civic Engagement')
+# economic_connectedness = zip_text.encode(text='Economic Connectedness', tooltip='ec_zip_meaning').properties(title='Economic Connectedness')
+# cohesiveness = zip_text.encode(text='Clustering',tooltip='clustering_zip_meaning').properties(title='Cohesiveness')
+# civic_engagement = zip_text.encode(text='Volunteering Rate', tooltip='volunteering_zip_meaning').properties(title='Civic Engagement')
 
 
 basic_info = alt.hconcat(
     zipcode,
     location,
-    num_below,
-    population,
+    # num_below,
+    # population,
 )
 
 basic_info.center = True
@@ -229,34 +229,49 @@ basic_info.title = "Detailed Information of the Selected Zipcode"
 # )
 
 
-social_capital_metric = alt.hconcat(
-    economic_connectedness,
-    cohesiveness,
-    civic_engagement
-)
+# social_capital_metric = alt.hconcat(
+#     economic_connectedness,
+#     cohesiveness,
+#     civic_engagement
+# )
 
 text_area = alt.vconcat(
     basic_info,
-    social_capital_metric,
+    # social_capital_metric,
     center = True
 )
 
-box_chart = alt.Chart(df).mark_boxplot().encode(
-    x = alt.X('Population in 2018:Q',
-        title = "Population in 2018:Q",
-        #scale=alt.Scale(rangeMin=0, rangeMax=1000),
-        scale = alt.Scale(domain=(0,10000))
-        ), 
-    tooltip = 'Population in 2018',
+# box_chart = alt.Chart(df).mark_boxplot(size = 10).encode(
+#     x = alt.X('Population in 2018:Q',
+#         title = "Population in 2018:Q",
+#         #scale=alt.Scale(rangeMin=0, rangeMax=1000),
+#         scale = alt.Scale(domain=(0,10000))
+#         ), 
+#     tooltip = 'Population in 2018',
+# ).transform_filter(single_brush).interactive()
+num_below_p50_max = df["Number Below Median"].max()
+bar_num_below_p50 = alt.Chart(df).mark_bar().encode(
+    x = alt.X('Number Below Median:Q',
+    scale=alt.Scale(domain=(0,num_below_p50_max))
+    )
 ).transform_filter(single_brush).interactive()
 
-map_with_text = alt.vconcat(
-    background+points,
-    text_area,
-    box_chart
-)
 
-st.write(map_with_text)
+population_max = df['Population in 2018'].max()
+bar_population = alt.Chart(df).mark_bar().encode(
+    x = alt.X('Population in 2018:Q',
+    scale=alt.Scale(domain=(0,population_max))
+    )
+).transform_filter(single_brush).interactive()
+
+# map_with_text = alt.vconcat(
+#     background+points,
+#     text_area,
+#     bar_num_below_p50,
+#     bar_population
+# )
+
+#st.write(map_with_text)
 
 metrics = ['Economic Connectedness Percentile', 'Clustering Percentile','Volunteering Rate Percentile']
 
@@ -282,7 +297,9 @@ bar = alt.Chart(df).transform_fold(
 
 map_with_text = alt.vconcat(
     background+points,
-    # text_area,
+    text_area,
+    bar_num_below_p50,
+    bar_population,
     bar
 )
-# st.write(map_with_text)
+st.write(map_with_text)
