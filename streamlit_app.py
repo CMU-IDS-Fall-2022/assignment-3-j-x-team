@@ -1,3 +1,4 @@
+from json import tool
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -86,7 +87,7 @@ df['Volunteering Rate Percentile'] = volunteering_zip_list
 # Make 3 new columns that describe the meaning of each social capital metric. 
 # The value of each column is the same for each row.
 # The meaning of each metric will be displayed to the user on hover.
-df['zip_meaning'] = 'The zipcode you selected from the mao above'
+df['zip_meaning'] = 'The zipcode you selected from the map above'
 df['location_meaning'] = "Location of the zipcode, formatted in State, County, City"
 df['num_below_p50_meaning'] = "Number of children with below-national-median parental household income."
 df['population_2018_meaning'] = 'Population in 2018'
@@ -126,8 +127,8 @@ st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', uns
 
 ## Part 1: Map Chart to show each zipcode as one point
 # create radio buttons for users to select one dimension
-st.header("Select one dimension of social capital to explore!")
-dimension = st.radio("Dimensions of social capital",("Economic Connectedness", "Cohesiveness", "Civic Engagement"))
+st.header("Select a social capital dimension to explore!")
+dimension = st.radio("Dimensions of social capital:",("Economic Connectedness", "Cohesiveness", "Civic Engagement"))
 
 # use altair to create map chart
 # altair supports tooltip on datapoints, but currently doesn't support to zoom in/out a map chart
@@ -152,11 +153,11 @@ dimension_dic = {
 
 descp_dict = { "Economic Connectedness": "two times the share of high-SES friends among low-SES individuals, averaged over all low-SES individuals in the ZIP code",
     "Cohesiveness": "the average fraction of an individual\s friend pairs who are also friends with each other", 
-    "Civic Engagement": " the percentage of Facebook users who are members of a 'volunteering' or 'activism' group"
+    "Civic Engagement": "the percentage of Facebook users who are members of a 'volunteering' or 'activism' group"
 }
 description = dimension_dic[dimension]
 
-st.markdown(str(dimension)+" is measured by "+str(dimension_dic[dimension])+", "+str(descp_dict[dimension])+".")
+st.markdown(str(dimension)+" is measured by "+str(descp_dict[dimension])+".")
 
 # the data points on the map background
 # TO DO: update column label names
@@ -172,11 +173,10 @@ points = alt.Chart(df).mark_circle().encode(
                         domain=[df[dimension_dic[dimension]].min(), df[dimension_dic[dimension]].max()], 
                         range=['red', 'orange','yellow','green','blue'])),
 ).properties(
-    width = 600,
+    width = 800,
     height = 400,
     title = map_title
 ).add_selection(single_brush)
-
 
 ## Part 2: Table that displaying specific info for the selected zip code:
 #   -location
@@ -184,7 +184,7 @@ points = alt.Chart(df).mark_circle().encode(
 #   -ec_zip (economic connectedness score)
 #   -clustering_zip (proportion of a person's friends who are friends with each other)
 #   -civic_organizations_zip (proportion of people who are members of a civic organization)
-st.subheader("Social Capital Metrics of Selected Zip Code")
+st.subheader("Click to Examine a Zipcode")
 
 # text to show detailed information of one zipcode
 # reference: https://altair-viz.github.io/gallery/scatter_linked_table.html
@@ -252,17 +252,29 @@ text_area = alt.vconcat(
 num_below_p50_max = df["Number Below Median"].max()
 bar_num_below_p50 = alt.Chart(df).mark_bar().encode(
     x = alt.X('Number Below Median:Q',
-    scale=alt.Scale(domain=(0,num_below_p50_max))
-    )
-).transform_filter(single_brush).interactive()
+        title = "Number of Children Below Median Income",
+        scale=alt.Scale(domain=(0,num_below_p50_max)),
+        axis=alt.Axis(tickMinStep=5000)
+    ),
+    tooltip = "Number Below Median"
+).properties(
+    width = 300,
+    height=100
+).transform_filter(single_brush)
 
 
 population_max = df['Population in 2018'].max()
 bar_population = alt.Chart(df).mark_bar().encode(
     x = alt.X('Population in 2018:Q',
-    scale=alt.Scale(domain=(0,population_max))
-    )
-).transform_filter(single_brush).interactive()
+        scale=alt.Scale(domain=(0,population_max)),
+        axis=alt.Axis(tickCount=15)
+        #tickCount=10
+    ),
+    tooltip = "Population in 2018"
+).properties(
+    width = 300,
+    height=100
+).transform_filter(single_brush)
 
 # map_with_text = alt.vconcat(
 #     background+points,
@@ -283,23 +295,36 @@ bar = alt.Chart(df).transform_fold(
         axis=alt.Axis(labelAngle=0),
         sort = metrics),
     y = alt.Y('value:Q',
+        scale=alt.Scale(domain=(0,population_max)),
+        #scale = alt.Scale(domain=(0,1)),
         title = "Percentile",
         #scale=alt.Scale(rangeMin=0, rangeMax=100),
-        #scale = alt.Scale(domain=(0,1))
         ), 
-    color = alt.Color('key:N',sort = metrics),
+    color = alt.Color('key:N',sort = metrics, legend=None),
     tooltip ='value:Q',
 ).properties(
-    width=600,
-    height=400,
+    width=300,
+    height=300,
     title='Social Capital Percentiles for Selected Zipcode'
 ).transform_filter(single_brush)
 
-map_with_text = alt.vconcat(
-    background+points,
+map_with_points = alt.vconcat(
+    background+points,   
+)
+
+left_chart = alt.vconcat(
     text_area,
     bar_num_below_p50,
     bar_population,
+)
+info_chart = alt.hconcat(
+    left_chart,
     bar
 )
-st.write(map_with_text)
+
+big_chart = alt.vconcat(
+    map_with_points,
+    info_chart
+)
+
+st.write(big_chart)
