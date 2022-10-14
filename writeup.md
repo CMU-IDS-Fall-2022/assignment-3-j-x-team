@@ -1,10 +1,11 @@
-# Project name
+# Social Capital Across the Nation
 
 ![A screenshot of your application. Could be a GIF.](screenshot.png)
 
-TODO: Update screenshot
 
-TODO: Short abstract describing the main goals and how you achieved them.
+Our team created a visualization that illustrates how social capital metrics vary across the U.S. for use by policymakers and social scientists.
+We sourced Data from Dr. Jaj Chetty's group at Harvard University, Opportunity Insights. https://opportunityinsights.org/ 
+
 
 ## Project Goals
 
