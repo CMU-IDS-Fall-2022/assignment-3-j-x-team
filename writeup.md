@@ -18,7 +18,7 @@ We decided to allow the user to examine details of a selected zipcode due to the
 
 ## Development
 
-First, our team met to collaboratively create our project goals and sketch our desired visualizations and features. Xinzhu implemented the U.S. map visualizations and radio buttons that allow the user to toggle between nationwide visualizations. Meanwhile, Jimmy implemented the visualization and data rendered after the user clicks on a selected zipcode.
+First, our team met to collaboratively create our project goals and sketch our desired visualizations and features. Xinzhu implemented the U.S. map visualizations and radio buttons that allow the user to toggle between nationwide visualizations, and explored methods to connect the map visualizations and bar graphs for one selected zipcode. Meanwhile, Jimmy implemented the visualization and data rendered after the user clicks on a selected zipcode.
 
 After meeting to collaboratively review our product, we added new data to our master dataframe pulled from another source, edited our tooltips, and double-checked whether alternative visualizations would be more intuitive.
 
