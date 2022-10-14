@@ -1,6 +1,6 @@
 # Social Capital Across the Nation
 
-![A screenshot of your application. Could be a GIF.](screenshot.png)
+!Screen Shot 2022-10-13 at 9.50.38 PM.png
 
 
 Our team created a visualization that illustrates how social capital metrics vary across the U.S. for use by policymakers and social scientists.
