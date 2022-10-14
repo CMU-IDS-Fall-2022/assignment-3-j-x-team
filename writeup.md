@@ -1,8 +1,5 @@
 # Social Capital Across the Nation
 
-![Social Capital Visualization](assignment-3-j-x-team/Screen Shot 2022-10-13 at 9.50.38 PM.png)
-
-
 Our team created a visualization that illustrates how social capital metrics vary across the U.S. for use by policymakers and social scientists.
 We sourced Data from Dr. Jaj Chetty's group at Harvard University, Opportunity Insights. https://opportunityinsights.org/ 
 
